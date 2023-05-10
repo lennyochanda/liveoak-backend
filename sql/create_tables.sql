@@ -17,5 +17,5 @@ CREATE TABLE users (
 INSERT INTO users
     (id, username, email, password, createdAt, updatedAt)
 VALUES
-    ("2c9e4d53-c019-4655-9531-ea6eeeb9673d", "Lenny Ochanda", "lennyonduto384@gmail.com", "$SECRET", "2023-05-05 03:33:54", "2023-05-05 03:33:54"),
-    ("b056c403-347d-4f87-b181-bd20fd6de987", "Wilson Ochanda", "wilsonochanda2000@gmail.com", "$SECRET", "2023-05-05 03:33:54", "2023-05-05 03:33:54");
+    ("2c9e4d53-c019-4655-9531-ea6eeeb9673d", "John Doe", "johndoe@gmail.com", "$SECRET", "2023-05-05 03:33:54", "2023-05-05 03:33:54"),
+    ("b056c403-347d-4f87-b181-bd20fd6de987", "Jane Doe", "janedoe@gmail.com", "$SECRET", "2023-05-05 03:33:54", "2023-05-05 03:33:54");

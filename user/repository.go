@@ -4,19 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strconv"
 )
 
 type MySQLUserRepository struct {
 	db *sql.DB
+	logger Logger
 }
 
 func NewMySQLUserRepository(db *sql.DB) *MySQLUserRepository {
-	return &MySQLUserRepository{db: db}
+	return &MySQLUserRepository{db: db, logger: Logger{"user-repository.log.txt"},}
 }
 
 func (r *MySQLUserRepository) Save(user *User) error {
-	// validate user data
-	// save user to MySQL db
 	stmt, err := r.db.Prepare(`INSERT INTO users(id, username, email, password, createdAt, updatedAt) VALUES(?, ?, ?, ?, ?, ?)`)
 
 	if err != nil {
@@ -29,28 +29,29 @@ func (r *MySQLUserRepository) Save(user *User) error {
 		return fmt.Errorf("could not execute query: %w", err)
 	}
 
+	r.logger.Log("Insert into Users: ", user)
 	return nil
 }
 
 func (r *MySQLUserRepository) GetById(id string) (*User, error) {
-	// get user from MySQL by id
-
 	user := &User{}
-	err := r.db.QueryRow("SELECT id, username, email, password, createdAt, updatedAt FROM users where id=?", id).Scan(&user)
+	err := r.db.QueryRow("SELECT id, username, email, password, createdAt, updatedAt FROM users where id=?", id).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
 
+	r.logger.Log("Get User by Id: ", id)
 	return user, nil
 }
 
 func (r *MySQLUserRepository) GetByEmail(email string) (*User, error) {
 	user := &User{}
-	err := r.db.QueryRow("SELECT id, username, email, password, createdAt, updatedAt FROM users where email=?", email).Scan(&user)
+	err := r.db.QueryRow("SELECT id, username, email, password, createdAt, updatedAt FROM users where email=?", email).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
 
+	r.logger.Log("Get User by Email: ", email)
 	return user, nil
 }
 
@@ -61,12 +62,14 @@ func (r *MySQLUserRepository) Update(user *User) error {
 	}
 
 	defer stmt.Close()
-
+	
 	_, err = stmt.Exec(user.Username, user.Email, user.PasswordHash, user.UpdatedAt, user.ID)
-
+	
 	if err != nil {
 		return err
 	}
+
+	r.logger.Log("Update User: ", user)
 	return nil
 }
 
@@ -78,20 +81,26 @@ func (r *MySQLUserRepository) List() ([]*User, error) {
 		return nil, err
 	}
 
+	
 	defer rows.Close()
-
+	
 	for rows.Next() {
 		var user User
-		err := rows.Scan(&user)
+		err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash, &user.CreatedAt, &user.UpdatedAt)
 
 		if err != nil {
 			return nil, err
 		}
+
 		users = append(users, &user)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
+	r.logger.Log("\n==========User List==========\n", nil)
+	for index := range users {
+		r.logger.Log(strconv.Itoa(index), *users[index])
+	}
 	return users, nil
 }

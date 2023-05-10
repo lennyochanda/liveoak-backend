@@ -45,6 +45,7 @@ func main() {
 	userService := user.NewUserService(userRepo)
 
 	users, _ := userService.GetAllUsers()
+
 	for _, value := range users {
 		fmt.Printf("User: %v\n", *value)
 	}
