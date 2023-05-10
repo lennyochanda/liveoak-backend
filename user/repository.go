@@ -25,7 +25,7 @@ func (r *MySQLUserRepository) Save(user *User) error {
 
 	defer stmt.Close()
 
-	if _, err := stmt.Exec(user.ID, user.Username, user.Email, user.Password, user.CreatedAt, user.UpdatedAt); err != nil {
+	if _, err := stmt.Exec(user.ID, user.Username, user.Email, user.PasswordHash, user.CreatedAt, user.UpdatedAt); err != nil {
 		return fmt.Errorf("could not execute query: %w", err)
 	}
 
@@ -35,10 +35,9 @@ func (r *MySQLUserRepository) Save(user *User) error {
 func (r *MySQLUserRepository) GetById(id string) (*User, error) {
 	// get user from MySQL by id
 
-	row := r.db.QueryRow("SELECT id, username, email, password, createdAt, updatedAt FROM users where id=?", id)
 	user := &User{}
-
-	if err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt); err != nil {
+	err := r.db.QueryRow("SELECT id, username, email, password, createdAt, updatedAt FROM users where id=?", id).Scan(&user)
+	if err != nil {
 		return nil, err
 	}
 
@@ -46,10 +45,9 @@ func (r *MySQLUserRepository) GetById(id string) (*User, error) {
 }
 
 func (r *MySQLUserRepository) GetByEmail(email string) (*User, error) {
-	row := r.db.QueryRow("SELECT id, username, email, password, createdAt, updatedAt FROM users where email=?", email)
 	user := &User{}
-
-	if err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt); err != nil {
+	err := r.db.QueryRow("SELECT id, username, email, password, createdAt, updatedAt FROM users where email=?", email).Scan(&user)
+	if err != nil {
 		return nil, err
 	}
 
@@ -57,16 +55,14 @@ func (r *MySQLUserRepository) GetByEmail(email string) (*User, error) {
 }
 
 func (r *MySQLUserRepository) Update(user *User) error {
-	query := `UPDATE users SET name=?, email=?, password=? WHERE id=?`
-
-	stmt, err := r.db.Prepare(query)
+	stmt, err := r.db.Prepare("UPDATE users SET name=?, email=?, password=? WHERE id=?")
 	if err != nil {
 		return err
 	}
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.Username, user.Email, user.Password, user.UpdatedAt, user.ID)
+	_, err = stmt.Exec(user.Username, user.Email, user.PasswordHash, user.UpdatedAt, user.ID)
 
 	if err != nil {
 		return err
@@ -77,8 +73,7 @@ func (r *MySQLUserRepository) Update(user *User) error {
 func (r *MySQLUserRepository) List() ([]*User, error) {
 	var users []*User
 
-	query := `SELECT id, username, email, password, createdAt, updatedAt FROM users`
-	rows, err := r.db.Query(query)
+	rows, err := r.db.Query("SELECT id, username, email, password, createdAt, updatedAt FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +82,7 @@ func (r *MySQLUserRepository) List() ([]*User, error) {
 
 	for rows.Next() {
 		var user User
-		err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.Email, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(&user)
 
 		if err != nil {
 			return nil, err

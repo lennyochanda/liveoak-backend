@@ -11,7 +11,7 @@ type User struct {
 	ID        string
 	Username  string
 	Email     string
-	Password  string
+	PasswordHash  string
 	CreatedAt string
 	UpdatedAt string
 }
@@ -32,21 +32,23 @@ func NewUserService(repo Repository) *UserService {
 	return &UserService{repo: repo}
 }
 
-func (s *UserService) CreateUser(user *User) error {
+func (s *UserService) CreateUser(userName, email, password string) error {
 	// validate user data
+	var user User
 
-	bytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
 		return err
 	}
 
-	user.Password = string(bytes)
+
+	user.PasswordHash = string(bytes)
 	user.ID = uuid.NewString()
 	now := time.Now().Format("2006-01-02 15:04:05")
 	user.CreatedAt = now
 	user.UpdatedAt = now
 
-	return s.repo.Save(user)
+	return s.repo.Save(&user)
 }
 
 func (s *UserService) GetUserById(id string) (*User, error) {
