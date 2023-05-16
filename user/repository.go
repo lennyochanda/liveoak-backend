@@ -5,15 +5,17 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+
+	"github.com/lennyochanda/LiveOak/logger"
 )
 
 type MySQLUserRepository struct {
 	db *sql.DB
-	logger Logger
+	logger logger.Logger
 }
 
 func NewMySQLUserRepository(db *sql.DB) *MySQLUserRepository {
-	return &MySQLUserRepository{db: db, logger: Logger{"user-repository.log.txt"},}
+	return &MySQLUserRepository{db: db, logger: logger.Logger{FileName: "user-repository.log.txt"},}
 }
 
 func (r *MySQLUserRepository) Save(user *User) error {

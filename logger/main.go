@@ -1,4 +1,4 @@
-package user
+package logger
 
 import (
 	"io"
@@ -7,11 +7,11 @@ import (
 )
 
 type Logger struct {
-	fileName string
+	FileName string
 }
 
 func (l *Logger) Log(message string, args any) {
-	logFile, err := os.OpenFile(l.fileName, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	logFile, err := os.OpenFile(l.FileName, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		panic("PathError: Wrong Path")
 	}

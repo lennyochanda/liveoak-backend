@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/lennyochanda/LiveOak/logger"
 )
 
 type User struct {
@@ -27,14 +28,14 @@ type Repository interface {
 
 type UserService struct {
 	repo Repository
-	logger Logger
+	logger logger.Logger
 }
 
 
 func NewUserService(repo Repository) *UserService {
 	userService := UserService {
 		repo: repo,
-		logger: Logger{"user-service.log.txt"},
+		logger: logger.Logger{FileName: "user-service.log.txt"},
 	}
 
 	userService.logger.Log("Created New User Service", nil)
