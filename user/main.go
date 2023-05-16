@@ -41,15 +41,16 @@ func NewUserService(repo Repository) *UserService {
 	return &userService
 }
 
-func (s *UserService) CreateUser(userName, email, password string) error {
+func (s *UserService) CreateUser(userdto CreateUserDTO) error {
 	var user User
 
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(userdto.Password), 14)
 	if err != nil {
 		return err
 	}
 
-
+	user.Username = userdto.UserName
+	user.Email = userdto.Email
 	user.PasswordHash = string(bytes)
 	user.ID = uuid.NewString()
 	now := time.Now().Format("2006-01-02 15:04:05")
