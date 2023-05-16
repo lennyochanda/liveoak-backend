@@ -21,4 +21,5 @@
 go.work
 
 .env
+*.http
 *.log.*

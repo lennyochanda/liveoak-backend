@@ -19,11 +19,11 @@ func main() {
 	}
 
 	cfg := mysql.Config{
-		User: os.Getenv("DBUSER"),
-		Passwd: os.Getenv("DBPASS"),
-		Net: "tcp",
-		Addr: "127.0.0.1:3306",
-		DBName: os.Getenv("DBNAME"),
+		User:                 os.Getenv("DBUSER"),
+		Passwd:               os.Getenv("DBPASS"),
+		Net:                  "tcp",
+		Addr:                 "127.0.0.1:3306",
+		DBName:               os.Getenv("DBNAME"),
 		AllowNativePasswords: true,
 	}
 
@@ -37,16 +37,10 @@ func main() {
 		log.Fatal(pingErr)
 	}
 	defer db.Close()
-	
-	fmt.Print("Connected to the database!\n")
 
+	fmt.Print("Connected to the database!\n")
 
 	userRepo := user.NewMySQLUserRepository(db)
 	userService := user.NewUserService(userRepo)
-
-	users, _ := userService.GetAllUsers()
-
-	for _, value := range users {
-		fmt.Printf("User: %v\n", *value)
-	}
+	user.SetUpUserRoutes(userService)
 }
