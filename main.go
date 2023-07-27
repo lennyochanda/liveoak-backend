@@ -12,18 +12,19 @@ import (
 	"github.com/lennyochanda/LiveOak/user"
 )
 
-func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Could not find env variables!\n")
+func init() {
+	if err := godotenv.Load(".env"); err != nil {
+		log.Fatal("Could not find env variables!\n", err)
 	}
+}
 
+func main() {
 	cfg := mysql.Config{
-		User:                 os.Getenv("DBUSER"),
-		Passwd:               os.Getenv("DBPASS"),
+		User:                 os.Getenv("DB_USER"),
+		Passwd:               os.Getenv("DB_PASS"),
 		Net:                  "tcp",
 		Addr:                 "127.0.0.1:3306",
-		DBName:               os.Getenv("DBNAME"),
+		DBName:               os.Getenv("DB_NAME"),
 		AllowNativePasswords: true,
 	}
 

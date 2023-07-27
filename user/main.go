@@ -7,34 +7,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/lennyochanda/LiveOak/logger"
+	"github.com/lennyochanda/LiveOak/types"
 )
 
-type User struct {
-	ID        string
-	Username  string
-	Email     string
-	PasswordHash  string
-	CreatedAt string
-	UpdatedAt string
-}
-
 type Repository interface {
-	Save(user *User) error
-	GetById(id string) (*User, error)
-	GetByEmail(email string) (*User, error)
-	Update(user *User) error
-	List() ([]*User, error)
+	Save(user *types.User) error
+	GetById(id string) (*types.User, error)
+	GetByEmail(email string) (*types.User, error)
+	Update(user *types.User) error
+	List() ([]*types.User, error)
 }
 
 type UserService struct {
-	repo Repository
+	repo   Repository
 	logger logger.Logger
 }
 
-
 func NewUserService(repo Repository) *UserService {
-	userService := UserService {
-		repo: repo,
+	userService := UserService{
+		repo:   repo,
 		logger: logger.Logger{FileName: "user-service.log.txt"},
 	}
 
@@ -43,7 +34,7 @@ func NewUserService(repo Repository) *UserService {
 }
 
 func (s *UserService) CreateUser(userdto CreateUserDTO) error {
-	var user User
+	var user types.User
 
 	bytes, err := bcrypt.GenerateFromPassword([]byte(userdto.Password), 14)
 	if err != nil {
@@ -62,23 +53,36 @@ func (s *UserService) CreateUser(userdto CreateUserDTO) error {
 	return s.repo.Save(&user)
 }
 
-func (s *UserService) GetUserById(id string) (*User, error) {
+func (s *UserService) GetUserById(id string) (*types.User, error) {
 	s.logger.Log("Getting User with ID: ", id)
 	return s.repo.GetById(id)
 }
 
-func (s *UserService) GetUserByEmail(email string) (*User, error) {
+func (s *UserService) GetUserByEmail(email string) (*types.User, error) {
 	s.logger.Log("Getting User with Email: ", email)
 	return s.repo.GetByEmail(email)
 }
 
-func (s *UserService) Update(user User) error {
+func (s *UserService) Update(user types.User) error {
 	s.logger.Log("Updating User with Details: ", user)
 	return s.repo.Update(&user)
 }
 
-func (s *UserService) GetAllUsers() ([]*User, error) {
+func (s *UserService) GetAllUsers() ([]*types.User, error) {
 	s.logger.Log("Getting List of Users", nil)
 	return s.repo.List()
 }
 
+func (s *UserService) CheckPassword(loginForm LoginUserDTO) (bool, error) {
+	user, err := s.repo.GetByEmail(loginForm.Email)
+	if err != nil {
+		return false, err
+	}
+	result := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(loginForm.Password))
+
+	if result == nil {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
